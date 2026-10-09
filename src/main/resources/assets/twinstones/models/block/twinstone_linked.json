@@ -1,0 +1,6 @@
+{
+  "parent": "twinstones:block/twinstone",
+  "textures": {
+    "rune": "twinstones:block/twinstone_rune_linked"
+  }
+}

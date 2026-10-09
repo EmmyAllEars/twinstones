@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "linked=false": {
+      "model": "twinstones:block/twinstone"
+    },
+    "linked=true": {
+      "model": "twinstones:block/twinstone_linked"
+    }
+  }
+}

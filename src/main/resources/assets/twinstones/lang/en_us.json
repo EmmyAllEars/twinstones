@@ -1,0 +1,9 @@
+{
+  "block.twinstones.twinstone": "Twinstone",
+  "screen.twinstones.name": "Name this Twinstone",
+  "message.twinstones.unnamed": "This stone has no name. Sneak + right-click to name it.",
+  "message.twinstones.named": "Named \"%s\". Waiting for its twin.",
+  "message.twinstones.paired": "\"%s\" is paired.",
+  "message.twinstones.no_partner": "No other stone is named \"%s\" yet.",
+  "message.twinstones.already_paired": "\"%s\" is already paired."
+}
