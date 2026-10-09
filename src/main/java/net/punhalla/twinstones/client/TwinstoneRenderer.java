@@ -36,8 +36,13 @@ public class TwinstoneRenderer implements BlockEntityRenderer<TwinstoneBlockEnti
         poseStack.scale(0.025F, -0.025F, 0.025F);
         Matrix4f matrix = poseStack.last().pose();
         int background = (int) (minecraft.options.getBackgroundOpacity(0.25F) * 255.0F) << 24;
-        font.drawInBatch(text, -font.width(text) / 2.0F, 0, 0xFFFFFFFF, false, matrix, buffers,
-                Font.DisplayMode.NORMAL, background, LightTexture.FULL_BRIGHT);
+        float x = -font.width(text) / 2.0F;
+        // Two passes, as vanilla nametags do. Drawing the backdrop and the letters in one
+        // depth-tested pass puts them at almost the same depth, and the letters flicker.
+        font.drawInBatch(text, x, 0, 0x20FFFFFF, false, matrix, buffers,
+                Font.DisplayMode.SEE_THROUGH, background, LightTexture.FULL_BRIGHT);
+        font.drawInBatch(text, x, 0, 0xFFFFFFFF, false, matrix, buffers,
+                Font.DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
         poseStack.popPose();
     }
 }

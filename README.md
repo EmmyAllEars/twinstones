@@ -51,7 +51,7 @@ Run a clean build afterwards before using the jar: `./gradlew clean build`.
 
 ## Status
 
-Version 0.2.0 builds and passes its GameTests on a headless development server. It has not yet been played in a real client, so the naming screen, the stone's appearance, and behaviour alongside other mods are untested.
+Version 0.2.1 builds and passes its GameTests on a headless development server. Version 0.2.0 was played in a real client on 2026-10-09 with no other mods: naming, pairing, travel to and from the Nether, breaking, and renaming all worked. The 0.2.1 name-label fix and behaviour alongside other mods are untested.
 
 Codex reviewed version 0.1.0 on 2026-10-09 and found five defects, all fixed in 0.2.0. The review and its original harness are in `docs/reviews/`.
 
@@ -76,4 +76,4 @@ Built from the [NeoForge MDK](https://github.com/NeoForgeMDKs/MDK-1.21.1-ModDevG
 
 ---
 
-*AI authorship: this mod's code, textures, and README were written by Claude (Claude Code, model claude-opus-5-5) in a working session with Emmy Ringuette, who specified the design, and are published with her approval. Method: scaffolded from the official NeoForge 1.21.1 MDK, written against NeoForge 21.1.256, reviewed by Codex (a second AI agent), and verified by a successful `./gradlew build` and eight passing headless GameTests. No play in a real game client had been done at the time of writing.*
+*AI authorship: this mod's code, textures, and README were written by Claude (Claude Code, model claude-opus-5-5) in a working session with Emmy Ringuette, who specified the design, and are published with her approval. Method: scaffolded from the official NeoForge 1.21.1 MDK, written against NeoForge 21.1.256, reviewed by Codex (a second AI agent), and verified by a successful `./gradlew build` eight passing headless GameTests, and a play test of 0.2.0 by Emmy.*
