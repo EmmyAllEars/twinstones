@@ -50,6 +50,10 @@ Version 0.1.0 compiles and builds. It has not yet been played in game.
 - `SetTagPayload.java`: the client-to-server naming packet
 - `client/`: naming screen and name label
 
+## License
+
+MIT. See `LICENSE`.
+
 ## Credits
 
 Built from the [NeoForge MDK](https://github.com/NeoForgeMDKs/MDK-1.21.1-ModDevGradle) template; its license is in `TEMPLATE_LICENSE.txt`.
