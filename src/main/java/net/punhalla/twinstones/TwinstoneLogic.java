@@ -2,17 +2,23 @@ package net.punhalla.twinstones;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 /** Server-side rules: naming, pairing, and the teleport itself. */
 public final class TwinstoneLogic {
@@ -36,7 +42,7 @@ public final class TwinstoneLogic {
             return;
         }
         if (!newKey.isEmpty()) {
-            pruneMissing(server, links, newKey);
+            reconcile(server, links, newKey);
             if (links.at(newKey).size() >= TwinstoneLinks.MAX_PER_NAME) {
                 player.displayClientMessage(Component.translatable("message.twinstones.already_paired", name), true);
                 return;
@@ -67,8 +73,12 @@ public final class TwinstoneLogic {
         MinecraftServer server = level.getServer();
         TwinstoneLinks links = TwinstoneLinks.get(server);
         GlobalPos self = GlobalPos.of(level.dimension(), pos);
-        links.add(key, self);
-        pruneMissing(server, links, key);
+        // A named stone can exist without a list entry (copied by /clone or a structure, or its
+        // dimension was absent for a while). It may join only if the name still has room.
+        if (!register(server, links, key, self)) {
+            player.displayClientMessage(Component.translatable("message.twinstones.already_paired", stone.getTagName()), true);
+            return;
+        }
         refreshLinked(server, links, key);
 
         GlobalPos partner = links.at(key).stream().filter(p -> !p.equals(self)).findFirst().orElse(null);
@@ -77,10 +87,17 @@ public final class TwinstoneLogic {
             player.displayClientMessage(Component.translatable("message.twinstones.no_partner", stone.getTagName()), true);
             return;
         }
-        BlockPos arrival = findArrival(destination, partner.pos());
+        Vec3 arrival = findArrival(destination, partner.pos());
+        if (arrival == null) {
+            player.displayClientMessage(Component.translatable("message.twinstones.blocked", stone.getTagName()), true);
+            return;
+        }
         level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 0.8F, 1.0F);
-        player.teleportTo(destination, arrival.getX() + 0.5, arrival.getY(), arrival.getZ() + 0.5,
-                player.getYRot(), player.getXRot());
+        player.teleportTo(destination, arrival.x, arrival.y, arrival.z, player.getYRot(), player.getXRot());
+        // teleportTo keeps momentum and the fall accumulator; arriving must not carry a fall over.
+        player.resetFallDistance();
+        player.setDeltaMovement(Vec3.ZERO);
+        player.connection.send(new ClientboundSetEntityMotionPacket(player));
         destination.playSound(null, partner.pos(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 0.8F, 1.0F);
     }
 
@@ -95,19 +112,39 @@ public final class TwinstoneLogic {
         refreshLinked(server, links, key);
     }
 
-    /** Drops list entries whose stone is gone or renamed (e.g. removed while its mod dimension was absent). */
-    private static void pruneMissing(MinecraftServer server, TwinstoneLinks links, String key) {
+    /** The one way a stone joins a name's list. Returns false when the name is full without it. */
+    private static boolean register(MinecraftServer server, TwinstoneLinks links, String key, GlobalPos self) {
+        reconcile(server, links, key);
+        List<GlobalPos> entries = links.at(key);
+        if (entries.contains(self)) {
+            return true;
+        }
+        if (entries.size() >= TwinstoneLinks.MAX_PER_NAME) {
+            return false;
+        }
+        links.add(key, self);
+        return true;
+    }
+
+    /**
+     * Brings a name's list back in line with the world: drops entries whose stone is gone or
+     * renamed, drops entries in dimensions this server does not have, and trims an oversized
+     * list from an older save back to a pair. A stone in a dimension that returns later
+     * re-registers the next time it is used.
+     */
+    private static void reconcile(MinecraftServer server, TwinstoneLinks links, String key) {
         for (GlobalPos entry : links.at(key)) {
             ServerLevel level = server.getLevel(entry.dimension());
-            // A dimension that is not loaded right now proves nothing; keep the entry.
-            if (level == null) {
-                continue;
-            }
-            boolean present = level.getBlockEntity(entry.pos()) instanceof TwinstoneBlockEntity stone
+            boolean present = level != null
+                    && level.getBlockEntity(entry.pos()) instanceof TwinstoneBlockEntity stone
                     && TwinstoneLinks.key(stone.getTagName()).equals(key);
             if (!present) {
                 links.remove(key, entry);
             }
+        }
+        List<GlobalPos> entries = links.at(key);
+        for (int i = TwinstoneLinks.MAX_PER_NAME; i < entries.size(); i++) {
+            links.remove(key, entries.get(i));
         }
     }
 
@@ -129,20 +166,33 @@ public final class TwinstoneLogic {
         }
     }
 
-    /** A standable spot beside the stone, or the top of the stone when it is boxed in. */
-    private static BlockPos findArrival(ServerLevel level, BlockPos stone) {
+    /**
+     * A safe place to stand next to the stone, else on top of it, else null. Uses the same test
+     * vanilla applies when a player leaves a bed or respawns: a floor to stand on, room for the
+     * player's whole body, nothing burning or harmful, and inside the world border.
+     */
+    @Nullable
+    static Vec3 findArrival(ServerLevel level, BlockPos stone) {
         for (Direction direction : Direction.Plane.HORIZONTAL) {
-            BlockPos feet = stone.relative(direction);
-            if (isOpen(level, feet) && isOpen(level, feet.above())
-                    && level.getBlockState(feet.below()).isFaceSturdy(level, feet.below(), Direction.UP)) {
-                return feet;
+            Vec3 spot = safeSpot(level, stone.relative(direction));
+            if (spot != null) {
+                return spot;
             }
         }
-        return stone.above();
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            Vec3 spot = safeSpot(level, stone.relative(direction).relative(direction.getClockWise()));
+            if (spot != null) {
+                return spot;
+            }
+        }
+        return safeSpot(level, stone.above());
     }
 
-    private static boolean isOpen(ServerLevel level, BlockPos pos) {
-        return level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()
-                && level.getFluidState(pos).isEmpty();
+    @Nullable
+    private static Vec3 safeSpot(ServerLevel level, BlockPos feet) {
+        if (!level.isInWorldBounds(feet) || !level.isInWorldBounds(feet.above())) {
+            return null;
+        }
+        return DismountHelper.findSafeDismountLocation(EntityType.PLAYER, level, feet, true);
     }
 }

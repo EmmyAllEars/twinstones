@@ -1,0 +1,10 @@
+// Adds the regression GameTests to the development run without putting them in the mod jar.
+// Usage: ./gradlew --no-configuration-cache --init-script gametest/init.gradle runGameTestServer
+def testWorld = new File(System.getProperty('java.io.tmpdir'), 'twinstones-gametest-' + UUID.randomUUID())
+allprojects {
+    afterEvaluate {
+        sourceSets.main.java.srcDir(new File(rootDir, 'gametest/java'))
+        sourceSets.main.resources.srcDir(new File(rootDir, 'gametest/resources'))
+        neoForge.runs.gameTestServer.gameDirectory = testWorld
+    }
+}

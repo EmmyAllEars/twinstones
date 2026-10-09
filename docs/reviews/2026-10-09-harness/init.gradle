@@ -1,0 +1,9 @@
+def reviewRoot = new File(System.getProperty('twinstones.reviewHarness', '/private/tmp/twinstones-review-harness'))
+def reviewWorld = new File(System.getProperty('java.io.tmpdir'), 'twinstones-review-world-' + UUID.randomUUID())
+allprojects {
+    afterEvaluate {
+        sourceSets.main.java.srcDir(new File(reviewRoot, 'java'))
+        sourceSets.main.resources.srcDir(new File(reviewRoot, 'resources'))
+        neoForge.runs.gameTestServer.gameDirectory = reviewWorld
+    }
+}

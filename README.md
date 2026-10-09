@@ -20,6 +20,8 @@ Name two stones the same thing and they become a pair. Right-click one and you a
 - **Linked look:** a paired stone's rune lights up, the stone gives off light, and it sheds particles. An unpaired stone is dull.
 - **Freeing a name:** breaking or renaming a stone frees its name, so the surviving stone can be paired again.
 - **Name label:** look at a named stone to see its name floating above it.
+- **Safe arrival:** you land beside the twin, or on top of it if the sides are blocked. If there is nowhere safe to stand (boxed in, lava, magma, fire), travel is refused with a message. Arriving clears any fall you were in.
+- **Missing dimensions:** if a stone's dimension is removed from the server, its name is freed. If the dimension comes back, the stone rejoins the next time someone uses it, provided the name still has room.
 
 There is no ownership, cost, cooldown, or item restriction. Anyone can use or rename any stone. This is version 1, built for family play.
 
@@ -37,9 +39,21 @@ Requires JDK 21.
 
 The jar lands in `build/libs/`.
 
+## Testing
+
+Eight headless GameTests cover pairing, renaming, breaking, save and load, safe arrival, the two-stone limit, missing dimensions, fall reset, naming-packet rules, and an overworld to Nether round trip. They live in `gametest/` and are kept out of the jar.
+
+```
+./gradlew --no-configuration-cache --init-script gametest/init.gradle runGameTestServer
+```
+
+Run a clean build afterwards before using the jar: `./gradlew clean build`.
+
 ## Status
 
-Version 0.1.0 compiles and builds. It has not yet been played in game.
+Version 0.2.0 builds and passes its GameTests on a headless development server. It has not yet been played in a real client, so the naming screen, the stone's appearance, and behaviour alongside other mods are untested.
+
+Codex reviewed version 0.1.0 on 2026-10-09 and found five defects, all fixed in 0.2.0. The review and its original harness are in `docs/reviews/`.
 
 ## Layout
 
@@ -49,6 +63,8 @@ Version 0.1.0 compiles and builds. It has not yet been played in game.
 - `TwinstoneLogic.java`: naming, pairing, and teleport rules
 - `SetTagPayload.java`: the client-to-server naming packet
 - `client/`: naming screen and name label
+- `gametest/`: regression tests and the init script that adds them to the development run
+- `docs/reviews/`: code review records
 
 ## License
 
@@ -60,4 +76,4 @@ Built from the [NeoForge MDK](https://github.com/NeoForgeMDKs/MDK-1.21.1-ModDevG
 
 ---
 
-*AI authorship: this mod's code, textures, and README were written by Claude (Claude Code, model claude-opus-5-5) in a working session with Emmy Ringuette, who specified the design, and are published with her approval. Method: scaffolded from the official NeoForge 1.21.1 MDK, written against NeoForge 21.1.256, and verified only by a successful `./gradlew build`. No in-game testing had been done at the time of writing.*
+*AI authorship: this mod's code, textures, and README were written by Claude (Claude Code, model claude-opus-5-5) in a working session with Emmy Ringuette, who specified the design, and are published with her approval. Method: scaffolded from the official NeoForge 1.21.1 MDK, written against NeoForge 21.1.256, reviewed by Codex (a second AI agent), and verified by a successful `./gradlew build` and eight passing headless GameTests. No play in a real game client had been done at the time of writing.*

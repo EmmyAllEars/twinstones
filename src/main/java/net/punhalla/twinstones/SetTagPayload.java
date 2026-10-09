@@ -19,7 +19,8 @@ public record SetTagPayload(BlockPos pos, String name) implements CustomPacketPa
             ByteBufCodecs.stringUtf8(TwinstoneLogic.MAX_NAME_LENGTH * 2), SetTagPayload::name,
             SetTagPayload::new);
 
-    private static final double MAX_REACH_SQUARED = 8.0 * 8.0;
+    // The naming screen stays open while the player moves, so allow some slack beyond normal reach.
+    private static final double REACH_SLACK = 4.0;
 
     @Override
     public Type<SetTagPayload> type() {
@@ -32,7 +33,9 @@ public record SetTagPayload(BlockPos pos, String name) implements CustomPacketPa
         }
         ServerLevel level = player.serverLevel();
         BlockPos pos = payload.pos();
-        if (!level.isLoaded(pos) || player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) > MAX_REACH_SQUARED) {
+        // A packet is not a right-click: apply the limits vanilla puts on a real block interaction.
+        if (player.isSpectator() || !level.isLoaded(pos) || !player.canInteractWithBlock(pos, REACH_SLACK)
+                || !level.mayInteract(player, pos) || !level.getWorldBorder().isWithinBounds(pos)) {
             return;
         }
         if (level.getBlockEntity(pos) instanceof TwinstoneBlockEntity stone) {

@@ -38,3 +38,7 @@ run/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+
+### Review artifacts ###
+# Run logs carry local machine paths.
+docs/reviews/**/run.log
