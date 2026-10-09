@@ -27,7 +27,7 @@ There is no ownership, cost, cooldown, or item restriction. Anyone can use or re
 
 ## Installing
 
-Both the server and every player need the mod. Put the jar in the `mods` folder of a NeoForge 1.21.1 instance.
+Download the jar from the [latest release](https://github.com/EmmyAllEars/twinstones/releases/latest) and put it in the `mods` folder of a NeoForge 1.21.1 instance. Both the server and every player need it.
 
 ## Building
 
@@ -51,9 +51,9 @@ Run a clean build afterwards before using the jar: `./gradlew clean build`.
 
 ## Status
 
-Version 0.2.1 builds and passes its GameTests on a headless development server. Version 0.2.0 was played in a real client on 2026-10-09 with no other mods: naming, pairing, travel to and from the Nether, breaking, and renaming all worked. The 0.2.1 name-label fix and behaviour alongside other mods are untested.
+Version 1.0.0. It passes its GameTests on a headless development server and was play tested in a real client on 2026-10-09 with no other mods: naming, pairing, travel to and from the Nether, breaking, and renaming all worked. Behaviour alongside other mods is untested.
 
-Codex reviewed version 0.1.0 on 2026-10-09 and found five defects, all fixed in 0.2.0. The review and its original harness are in `docs/reviews/`.
+Codex reviewed version 0.1.0 on 2026-10-09 and found five defects, all fixed before 1.0.0. The review and its original harness are in `docs/reviews/`.
 
 ## Layout
 
