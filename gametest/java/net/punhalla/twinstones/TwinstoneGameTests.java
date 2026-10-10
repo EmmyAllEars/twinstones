@@ -98,6 +98,22 @@ public class TwinstoneGameTests {
     }
 
     @GameTest(template = "empty")
+    public static void linking_keeps_the_stone_facing(GameTestHelper h) {
+        ServerLevel level = h.getLevel();
+        ServerPlayer player = fakePlayer(level);
+        BlockPos a = place(h, 2), b = place(h, 5);
+        level.setBlockAndUpdate(a, level.getBlockState(a).setValue(TwinstoneBlock.FACING, Direction.EAST));
+        rename(h, player, a, "Test Facing");
+        rename(h, player, b, "Test Facing");
+        h.assertTrue(linked(level, a), "the stones must link");
+        h.assertTrue(level.getBlockState(a).getValue(TwinstoneBlock.FACING) == Direction.EAST, "linking must not turn the stone");
+        h.assertTrue(stone(level, a).getTagName().equals("Test Facing"), "turning the stone must keep its name");
+        rename(h, player, b, "");
+        h.assertTrue(level.getBlockState(a).getValue(TwinstoneBlock.FACING) == Direction.EAST, "unlinking must not turn the stone");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void boxed_in_stone_refuses_travel(GameTestHelper h) {
         ServerLevel level = h.getLevel();
         ServerPlayer player = h.makeMockServerPlayerInLevel();

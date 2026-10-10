@@ -1,10 +1,34 @@
 {
   "variants": {
-    "linked=false": {
+    "facing=north,linked=false": {
       "model": "twinstones:block/twinstone"
     },
-    "linked=true": {
+    "facing=north,linked=true": {
       "model": "twinstones:block/twinstone_linked"
+    },
+    "facing=east,linked=false": {
+      "model": "twinstones:block/twinstone",
+      "y": 90
+    },
+    "facing=east,linked=true": {
+      "model": "twinstones:block/twinstone_linked",
+      "y": 90
+    },
+    "facing=south,linked=false": {
+      "model": "twinstones:block/twinstone",
+      "y": 180
+    },
+    "facing=south,linked=true": {
+      "model": "twinstones:block/twinstone_linked",
+      "y": 180
+    },
+    "facing=west,linked=false": {
+      "model": "twinstones:block/twinstone",
+      "y": 270
+    },
+    "facing=west,linked=true": {
+      "model": "twinstones:block/twinstone_linked",
+      "y": 270
     }
   }
 }
