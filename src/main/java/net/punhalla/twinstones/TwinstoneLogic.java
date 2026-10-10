@@ -167,19 +167,23 @@ public final class TwinstoneLogic {
     }
 
     /**
-     * A safe place to stand next to the stone, else on top of it, else null. Uses the same test
-     * vanilla applies when a player leaves a bed or respawns: a floor to stand on, room for the
+     * A safe place to stand: in front of the stone (the side it faces) if possible, then its
+     * other sides, then the corners, then on top of it, else null. Uses the same test vanilla
+     * applies when a player leaves a bed or respawns: a floor to stand on, room for the
      * player's whole body, nothing burning or harmful, and inside the world border.
      */
     @Nullable
     static Vec3 findArrival(ServerLevel level, BlockPos stone) {
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
+        BlockState state = level.getBlockState(stone);
+        Direction front = state.hasProperty(TwinstoneBlock.FACING) ? state.getValue(TwinstoneBlock.FACING) : Direction.NORTH;
+        Direction[] sides = {front, front.getClockWise(), front.getCounterClockWise(), front.getOpposite()};
+        for (Direction direction : sides) {
             Vec3 spot = safeSpot(level, stone.relative(direction));
             if (spot != null) {
                 return spot;
             }
         }
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
+        for (Direction direction : sides) {
             Vec3 spot = safeSpot(level, stone.relative(direction).relative(direction.getClockWise()));
             if (spot != null) {
                 return spot;

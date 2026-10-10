@@ -17,10 +17,11 @@ Name two stones the same thing and they become a pair. Right-click one and you a
 - **Name:** sneak + right-click a stone to name or rename it. Names match ignoring case.
 - **Travel:** right-click a named stone to teleport to its twin. Pairs work across every dimension, including ones added by other mods.
 - **Pairs only:** a name can belong to two stones. Naming a third stone the same thing is refused with an "already paired" message.
+- **Facing:** a stone is placed with its rune facing you.
 - **Linked look:** a paired stone's rune lights up, the stone gives off light, and it sheds particles. An unpaired stone is dull.
 - **Freeing a name:** breaking or renaming a stone frees its name, so the surviving stone can be paired again.
 - **Name label:** look at a named stone to see its name floating above it.
-- **Safe arrival:** you land beside the twin, or on top of it if the sides are blocked. If there is nowhere safe to stand (boxed in, lava, magma, fire), travel is refused with a message. Arriving clears any fall you were in.
+- **Safe arrival:** you land in front of the twin (the side its rune was placed facing), or beside it, or on top of it if the sides are blocked. If there is nowhere safe to stand (boxed in, lava, magma, fire), travel is refused with a message. Arriving clears any fall you were in.
 - **Missing dimensions:** if a stone's dimension is removed from the server, its name is freed. If the dimension comes back, the stone rejoins the next time someone uses it, provided the name still has room.
 
 There is no ownership, cost, cooldown, or item restriction. Anyone can use or rename any stone. This is version 1, built for family play.
@@ -41,7 +42,7 @@ The jar lands in `build/libs/`.
 
 ## Testing
 
-Eight headless GameTests cover pairing, renaming, breaking, save and load, safe arrival, the two-stone limit, missing dimensions, fall reset, naming-packet rules, and an overworld to Nether round trip. They live in `gametest/` and are kept out of the jar.
+Ten headless GameTests cover pairing, renaming, breaking, save and load, safe arrival, the two-stone limit, missing dimensions, fall reset, naming-packet rules, and an overworld to Nether round trip. They live in `gametest/` and are kept out of the jar.
 
 ```
 ./gradlew --no-configuration-cache --init-script gametest/init.gradle runGameTestServer

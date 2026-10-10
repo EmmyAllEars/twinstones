@@ -98,6 +98,47 @@ public class TwinstoneGameTests {
     }
 
     @GameTest(template = "empty")
+    public static void linking_keeps_the_stone_facing(GameTestHelper h) {
+        ServerLevel level = h.getLevel();
+        ServerPlayer player = fakePlayer(level);
+        BlockPos a = place(h, 2), b = place(h, 5);
+        level.setBlockAndUpdate(a, level.getBlockState(a).setValue(TwinstoneBlock.FACING, Direction.EAST));
+        rename(h, player, a, "Test Facing");
+        rename(h, player, b, "Test Facing");
+        h.assertTrue(linked(level, a), "the stones must link");
+        h.assertTrue(level.getBlockState(a).getValue(TwinstoneBlock.FACING) == Direction.EAST, "linking must not turn the stone");
+        h.assertTrue(stone(level, a).getTagName().equals("Test Facing"), "turning the stone must keep its name");
+        rename(h, player, b, "");
+        h.assertTrue(level.getBlockState(a).getValue(TwinstoneBlock.FACING) == Direction.EAST, "unlinking must not turn the stone");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void arrival_is_in_front_of_the_stone(GameTestHelper h) {
+        ServerLevel level = h.getLevel();
+        BlockPos a = place(h, 3);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            level.setBlockAndUpdate(a.relative(direction).below(), Blocks.STONE.defaultBlockState());
+            level.setBlockAndUpdate(a.relative(direction), Blocks.AIR.defaultBlockState());
+            level.setBlockAndUpdate(a.relative(direction).above(), Blocks.AIR.defaultBlockState());
+        }
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            level.setBlockAndUpdate(a, level.getBlockState(a).setValue(TwinstoneBlock.FACING, facing));
+            Vec3 arrival = TwinstoneLogic.findArrival(level, a);
+            h.assertTrue(arrival != null && BlockPos.containing(arrival).equals(a.relative(facing)),
+                    "arrival must be on the side the stone faces: " + facing);
+        }
+        // With the front blocked, the next choice is a side, not the back.
+        level.setBlockAndUpdate(a, level.getBlockState(a).setValue(TwinstoneBlock.FACING, Direction.EAST));
+        level.setBlockAndUpdate(a.east(), Blocks.STONE.defaultBlockState());
+        level.setBlockAndUpdate(a.east().above(), Blocks.STONE.defaultBlockState());
+        Vec3 fallback = TwinstoneLogic.findArrival(level, a);
+        h.assertTrue(fallback != null && BlockPos.containing(fallback).equals(a.south()),
+                "with the front blocked, arrival must move to the stone's side");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void boxed_in_stone_refuses_travel(GameTestHelper h) {
         ServerLevel level = h.getLevel();
         ServerPlayer player = h.makeMockServerPlayerInLevel();
