@@ -52,9 +52,11 @@ Run a clean build afterwards before using the jar: `./gradlew clean build`.
 
 ## Status
 
-Version 1.0.0. It passes its GameTests on a headless development server and was play tested in a real client on 2026-10-09 with no other mods: naming, pairing, travel to and from the Nether, breaking, and renaming all worked. Behaviour alongside other mods is untested.
+Current version: see the [latest release](https://github.com/EmmyAllEars/twinstones/releases/latest), which lists what changed and what was tested.
 
-Codex reviewed version 0.1.0 on 2026-10-09 and found five defects, all fixed before 1.0.0. The review and its original harness are in `docs/reviews/`.
+Each release passes the GameTests on a headless development server and is play tested in a real client with no other mods. Behaviour alongside other mods is untested.
+
+Codex reviewed version 0.1.0 on 2026-10-09 and found five defects, all fixed before 1.0.0. That review and its original harness are in `docs/reviews/`.
 
 ## Layout
 
