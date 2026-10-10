@@ -114,6 +114,31 @@ public class TwinstoneGameTests {
     }
 
     @GameTest(template = "empty")
+    public static void arrival_is_in_front_of_the_stone(GameTestHelper h) {
+        ServerLevel level = h.getLevel();
+        BlockPos a = place(h, 3);
+        for (Direction direction : Direction.Plane.HORIZONTAL) {
+            level.setBlockAndUpdate(a.relative(direction).below(), Blocks.STONE.defaultBlockState());
+            level.setBlockAndUpdate(a.relative(direction), Blocks.AIR.defaultBlockState());
+            level.setBlockAndUpdate(a.relative(direction).above(), Blocks.AIR.defaultBlockState());
+        }
+        for (Direction facing : Direction.Plane.HORIZONTAL) {
+            level.setBlockAndUpdate(a, level.getBlockState(a).setValue(TwinstoneBlock.FACING, facing));
+            Vec3 arrival = TwinstoneLogic.findArrival(level, a);
+            h.assertTrue(arrival != null && BlockPos.containing(arrival).equals(a.relative(facing)),
+                    "arrival must be on the side the stone faces: " + facing);
+        }
+        // With the front blocked, the next choice is a side, not the back.
+        level.setBlockAndUpdate(a, level.getBlockState(a).setValue(TwinstoneBlock.FACING, Direction.EAST));
+        level.setBlockAndUpdate(a.east(), Blocks.STONE.defaultBlockState());
+        level.setBlockAndUpdate(a.east().above(), Blocks.STONE.defaultBlockState());
+        Vec3 fallback = TwinstoneLogic.findArrival(level, a);
+        h.assertTrue(fallback != null && BlockPos.containing(fallback).equals(a.south()),
+                "with the front blocked, arrival must move to the stone's side");
+        h.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void boxed_in_stone_refuses_travel(GameTestHelper h) {
         ServerLevel level = h.getLevel();
         ServerPlayer player = h.makeMockServerPlayerInLevel();
